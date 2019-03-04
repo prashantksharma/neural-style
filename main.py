@@ -160,7 +160,7 @@ def get_style_model_and_losses(cnn, normalization_mean, normalization_std,
     i = 0 # increment every time we see a conv
 
     for layer in cnn.children():
-        if isinstance(layer, nn.Conv2):
+        if isinstance(layer, nn.Conv2d):
             i += 1
             name = 'conv_{}'.format(i)
         elif isinstance(layer, nn.ReLU):
@@ -181,17 +181,17 @@ def get_style_model_and_losses(cnn, normalization_mean, normalization_std,
 
         if name in content_layers:
             # add contentLoss
-            target = model(content_img).detach()
+            target = model(content_img).clone().detach()
             content_loss = ContentLoss(target)
             model.add_module("content_loss_{}".format(i), content_loss)
             content_losses.append(content_loss)
 
         if name in style_layers:
             # add style loss
-            target_feature = model(style_img).detach()
+            target_feature = model(style_img).clone().detach()
             style_loss = StyleLoss(target_feature)
             model.add_module("style_loss_{}".format(i), style_loss)
-            style_loss.append(style_loss)
+            style_losses.append(style_loss)
 
     # now we trim off the layers after the last content and style losses
     for i in range(len(model) -1, -1 , -1):
